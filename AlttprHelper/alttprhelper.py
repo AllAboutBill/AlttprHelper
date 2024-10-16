@@ -1,3 +1,4 @@
+
 import os
 import yaml
 import aiohttp
@@ -191,6 +192,8 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         self.path_inputs = {}
         self.path_rows = {}
 
+        self.msu_folder = None
+
         # Paths and configuration
         self.config = configparser.ConfigParser()
         self.config_file = "config.ini"
@@ -199,6 +202,11 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         self.spritesheet = None
         self.sprite_data = None
         self.sprite_display_label_in_actions = QtWidgets.QLabel()
+
+        # Initialize the GIF Cache **before** loading sprites and updating display
+        self.gif_cache = GifCache()
+        self.gif_cache.gif_preloaded.connect(self.on_gif_preloaded)
+        self.gif_cache.gif_load_failed.connect(self.on_gif_load_failed)
 
         # Load the sprite sheet and data
         self.load_sprites()
@@ -231,15 +239,30 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         # Setup the UI
         self.init_ui()
 
-
         self.load_config()
         self.loading_config = False
 
         # After loading config, update the sprite display in the actions box
         self.update_sprite_display_in_actions()
 
+        # Preload the GIF for the current sprite
+        self.preload_current_sprite_gif()
+
         # Start the audio stream after the UI is set up
         self.start_audio_stream()
+
+    def preload_current_sprite_gif(self):
+        """Preload the GIF for the current sprite from the config or default."""
+        selected_sprite = self.patch_settings.get("spritename", "Link")
+
+        # Replace spaces with '%20' to form a valid URL
+        selected_sprite_encoded = selected_sprite.replace(" ", "%20")
+        gif_url = f"https://hyphen-ated.github.io/alttpr-sprite-gallery/spriteimgs/{selected_sprite_encoded}.gif"
+
+        print(f"Preloading GIF for sprite '{selected_sprite}' from URL: {gif_url}")
+
+        # Trigger preloading
+        self.gif_cache.preload_gif(selected_sprite, gif_url)
 
 
     def play_audio_directly(self, file_path):
@@ -510,7 +533,10 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
             # After running the selection logic, check if the playlist is ready
             if not self.playlist:
                 self.show_message("No MSU files loaded to play.")
-                print(f"[DEBUG] No WAV files were found in {self.msu_folder}")
+                if self.msu_folder:
+                    print(f"[DEBUG] No WAV files were found in {self.msu_folder}")
+                else:
+                    print("[DEBUG] MSU folder is not set.")
                 return
 
             # Play the current track if the playlist is ready
@@ -518,7 +544,6 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
                 self.play_audio(self.playlist[self.current_track_index])
             else:
                 self.show_message("No MSU files available to play.")
-
 
 
     def pause_audio_control(self):
@@ -782,12 +807,14 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
 
         # Exit early if 'Random' is selected
         if selected_msu_pack == "Random":
+            self.msu_folder = None  # Explicitly set to None
             return  # Do nothing if 'Random' is selected
 
         # Retrieve the MSU folder from the path input
         msu_root_folder = self.path_inputs["msu_folder"].text()
         if not msu_root_folder or not os.path.exists(msu_root_folder):
             self.show_message("MSU folder is not valid. Please check the folder path.")
+            self.msu_folder = None  # Explicitly set to None
             return
 
         msu_folder = os.path.join(msu_root_folder, selected_msu_pack)
@@ -795,10 +822,16 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         # Check if a valid MSU pack folder was selected
         if not selected_msu_pack:
             self.show_message("No MSU pack selected; proceeding without MSU support.")
+            self.msu_folder = None  # Explicitly set to None
             return
 
-        # Store msu_folder as an attribute for later use
-        self.msu_folder = msu_folder
+        # Check if the MSU folder exists
+        if os.path.isdir(msu_folder):
+            self.msu_folder = msu_folder  # Set msu_folder only if the directory exists
+        else:
+            self.show_message(f"Invalid MSU pack folder: {msu_folder}")
+            self.msu_folder = None  # Explicitly set to None
+            return
 
         # Stop audio and clear any Pygame events
         self.stop_audio()
@@ -808,17 +841,14 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         self.playlist = []
         self.current_track_index = 0
 
-        # If the selected MSU folder exists, prepare the playlist
-        if os.path.isdir(msu_folder):
-            self.prepare_msu_playlist(msu_folder)
+        # Prepare the playlist
+        self.prepare_msu_playlist(msu_folder)
 
-            if self.playlist:
-                # Start playing the first track if a playlist is prepared
-                self.play_audio(self.playlist[self.current_track_index])
-            else:
-                self.show_message(f"No audio files found in {msu_folder}.")
+        if self.playlist:
+            # Start playing the first track if a playlist is prepared
+            self.play_audio(self.playlist[self.current_track_index])
         else:
-            self.show_message(f"Invalid MSU pack folder: {msu_folder}")
+            self.show_message(f"No audio files found in {msu_folder}.")
 
 
 
@@ -833,7 +863,7 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
             self.playlist = []
 
             # Gather all the WAV files from the MSU pack folder
-            wav_files = [os.path.join(msu_folder, f) for f in os.listdir(msu_folder) if f.endswith('.wav')]
+            wav_files = [os.path.join(msu_folder, f) for f in os.listdir(msu_folder) if f.lower().endswith('.wav')]
 
             # If no WAV files are found, attempt to convert PCM files to WAV
             if not wav_files:
@@ -844,14 +874,14 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
                     return
 
                 # Gather newly converted WAV files after PCM conversion
-                wav_files = [os.path.join(msu_folder, f) for f in os.listdir(msu_folder) if f.endswith('.wav')]
+                wav_files = [os.path.join(msu_folder, f) for f in os.listdir(msu_folder) if f.lower().endswith('.wav')]
 
             # Sort the playlist based on the track number in the filename (using regex to extract the number)
             def extract_track_number(file_name):
-                match = re.search(r'-(\d+)\.wav$', file_name)
+                match = re.search(r'-(\d+)\.wav$', file_name, re.IGNORECASE)
                 return int(match.group(1)) if match else float('inf')  # Handle non-numbered files gracefully
 
-            self.playlist = sorted(wav_files, key=extract_track_number)
+            self.playlist = sorted(wav_files, key=lambda x: extract_track_number(os.path.basename(x)))
 
             # Debugging: Print out the playlist to ensure correct ordering
             print(f"MSU Playlist: {self.playlist}")
@@ -861,6 +891,7 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
 
         except Exception as e:
             self.show_message(f"Error preparing MSU playlist: {e}")
+
 
 
     def check_next_track(self):
@@ -2427,6 +2458,17 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         with open("seed_history.txt", "a") as file:
             file.write(entry)
 
+    def on_gif_preloaded(self, sprite_id):
+        """Handle successful GIF preloading."""
+        print(f"Successfully preloaded GIF for sprite '{sprite_id}'.")
+
+    def on_gif_load_failed(self, sprite_id, error_message):
+        """Handle failed GIF preloading."""
+        QtWidgets.QMessageBox.warning(
+            self,
+            "GIF Load Failed",
+            f"Failed to preload GIF for sprite '{sprite_id}': {error_message}"
+        )
 
 
     def update_sprite_display_in_actions(self):
@@ -2457,10 +2499,22 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
                 # Set the scaled pixmap to the label
                 self.sprite_display_label_in_actions.setFixedSize(scaled_width, scaled_height)
 
+                # Remove any existing SpriteLabel to prevent stacking
+                for child in self.sprite_display_label_in_actions.findChildren(SpriteLabel):
+                    child.deleteLater()
+
                 # Create and set the SpriteLabel widget
-                sprite_label = SpriteLabel(sprite_pixmap, gif_url, parent=self.sprite_display_label_in_actions)
+                sprite_label = SpriteLabel(
+                    sprite_pixmap,
+                    gif_url,
+                    self.gif_cache,
+                    sprite_id=selected_sprite,
+                    parent=self.sprite_display_label_in_actions
+                )
                 sprite_label.setFixedSize(scaled_width, scaled_height)
                 sprite_label.show()
+
+
 
     def extract_and_scale_sprite(self, sprite_index, scale_factor):
         """Extract and scale the sprite from the spritesheet."""
@@ -3103,7 +3157,17 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
 
 
 
+    def closeEvent(self, event):
+        """Handle application close event to clean up resources."""
+        # Stop any playing audio
+        self.stop_audio_stream()
+        pygame.mixer.quit()
 
+        # Clean up the GIF cache
+        self.gif_cache.cache.clear()
+
+        # Proceed with the normal close event
+        super().closeEvent(event)
 
 
     def fetch_daily_seed(self):
@@ -3310,15 +3374,23 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         print("[DEBUG] UI elements updated based on patch settings.")
 
 
+
     def open_customize_patch_dialog(self):
-        """Open the Customize Patch dialog and update sprite image if changed."""
-        dialog = CustomizePatchDialog(self.patch_settings, self)
-        if dialog.exec_():
-            # Update patch settings after closing the dialog
-            self.patch_settings = dialog.get_patch_settings()
-            # Update sprite display in actions box
-            self.update_sprite_display_in_actions()
+        """Open the Customize Patch dialog."""
+        dialog = CustomizePatchDialog(self.patch_settings, parent=self)
+
+        # Connect the sprite_changed signal to the gif_cache.preload_gif method
+        dialog.sprite_changed.connect(self.gif_cache.preload_gif)
+
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            # Get updated settings
+            updated_settings = dialog.get_patch_settings()
+            self.patch_settings.update(updated_settings)
             self.save_config()
+            self.update_sprite_display_in_actions()
+        else:
+            # If canceled, do nothing
+            pass
 
     def create_advanced_preset(self):
         """Create a custom preset with advanced settings."""
@@ -3799,6 +3871,9 @@ class PermalinkPatchDialog(QtWidgets.QDialog):
 
 
 class CustomizePatchDialog(QtWidgets.QDialog):
+    # Define a custom signal that emits sprite_id and gif_url
+    sprite_changed = QtCore.pyqtSignal(str, str)
+
     def __init__(self, patch_settings, parent=None):
         super().__init__(parent)
         self.patch_settings = patch_settings
@@ -3984,23 +4059,29 @@ class CustomizePatchDialog(QtWidgets.QDialog):
         else:
             return QtGui.QPixmap()
 
-
     def update_sprite_preview(self, index):
         try:
             if 0 <= index < len(self.sprite_indices):
+                sprite_id = self.sprite_names[index]
                 sprite_index = self.sprite_indices[index]
                 scaled_pixmap = self.extract_and_scale_sprite(sprite_index, self.preview_scale_factor)
                 if not scaled_pixmap.isNull():
                     self.sprite_preview_label.setPixmap(scaled_pixmap)
+
+                    # Construct the GIF URL
+                    selected_sprite = self.spritename_combo.currentText()
+                    selected_sprite_encoded = selected_sprite.replace(" ", "%20")
+                    gif_url = f"https://hyphen-ated.github.io/alttpr-sprite-gallery/spriteimgs/{selected_sprite_encoded}.gif"
+                    print(f"Emitting sprite_changed signal for sprite '{selected_sprite}' with GIF URL: {gif_url}")
+
+                    # Emit the signal to the main app
+                    self.sprite_changed.emit(selected_sprite, gif_url)
                 else:
                     self.sprite_preview_label.clear()
             else:
                 self.sprite_preview_label.clear()
         except Exception as e:
             print(f"[DEBUG] Error updating sprite preview: {e}")
-
-
-
 
     def get_patch_settings(self):
         """Retrieve the selected patch settings."""
@@ -4026,6 +4107,7 @@ class CustomizePatchDialog(QtWidgets.QDialog):
         msg_box = QtWidgets.QMessageBox()
         msg_box.setText(message)
         msg_box.exec_()
+
 
 
 
@@ -5046,63 +5128,141 @@ class AdvancedCustomizeSeedDialog(QtWidgets.QDialog):
         # Save the JSON data to the specified file path
         with open(filepath, 'w') as json_file:
             json.dump(self.custom_settings, json_file, indent=2)
+
 class GifPopup(QtWidgets.QWidget):
-    def __init__(self, gif_url, parent=None):
+    def __init__(self, movie, parent=None):
         super().__init__(parent)
+        
+        # Set the size to 192x192 pixels
+        self.setFixedSize(192, 192)
+        
+        # Remove window decorations and make it a tooltip-like popup
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.ToolTip)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        self.label = QtWidgets.QLabel(self)
-
-        # Load the GIF from the URL
-        response = requests.get(gif_url)
-        if response.status_code == 200:
-            temp_gif_path = os.path.join(os.getcwd(), "hover_sprite.gif")
-            with open(temp_gif_path, 'wb') as f:
-                f.write(response.content)
-
-            # Load the GIF and display it
-            self.display_full_gif(temp_gif_path)
-
-        else:
-            print(f"Failed to load GIF: {gif_url}")
-
-    def display_full_gif(self, gif_path):
-        """Display the full GIF without cropping, using its original size."""
-        # Create a QMovie object for the GIF
-        movie = QtGui.QMovie(gif_path)
-        movie.setScaledSize(QtCore.QSize(192, 192))  # Set to 192x192 size
-
-        # Set the QLabel to display the GIF
-        self.label.setMovie(movie)
-        movie.start()
-
-        # Set the size of the popup to match the GIF size
-        self.setFixedSize(192, 192)
-class SpriteLabel(QtWidgets.QLabel):
-    def __init__(self, sprite_pixmap, gif_url, parent=None):
-        super().__init__(parent)
-        self.static_pixmap = sprite_pixmap  # Static sprite image
-        self.gif_url = gif_url  # URL for the GIF
-        self.gif_popup = None  # Popup window for the GIF
-
-        self.setPixmap(self.static_pixmap)  # Set the static sprite by default
-        self.setFixedSize(self.static_pixmap.size())  # Set label size based on static sprite size
-
-    def enterEvent(self, event):
-        """Triggered when the mouse hovers over the QLabel."""
-        if not self.gif_popup:
-            # Create a popup window for the GIF
-            self.gif_popup = GifPopup(self.gif_url)
         
-        # Show the popup near the cursor
-        cursor_pos = QtGui.QCursor.pos()
-        self.gif_popup.move(cursor_pos.x() + 20, cursor_pos.y() + 20)  # Position next to the cursor
-        self.gif_popup.show()
+        # Initialize the QLabel to display the GIF
+        self.label = QtWidgets.QLabel(self)
+        self.label.setGeometry(0, 0, 192, 192)  # Set to match the popup size
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setScaledContents(True)  # Ensure the GIF scales to fit the label
+        
+        if movie:
+            self.label.setMovie(movie)
+            movie.start()
+        else:
+            print("No movie provided to GifPopup.")
+    
+    def closeEvent(self, event):
+        """Override the closeEvent to stop the movie."""
+        if self.label.movie():
+            self.label.movie().stop()
+        super().closeEvent(event)
 
-    def leaveEvent(self, event):
-        """Triggered when the mouse leaves the QLabel."""
+
+
+class GifCache(QtCore.QObject):
+    gif_preloaded = QtCore.pyqtSignal(str)
+    gif_load_failed = QtCore.pyqtSignal(str, str)
+
+    def __init__(self):
+        super().__init__()
+        # Dictionary to store QMovie objects keyed by sprite identifiers
+        self.cache = {}
+
+    def preload_gif(self, sprite_id, gif_url):
+        """
+        Preload the GIF from the given URL and store the QMovie in the cache.
+
+        :param sprite_id: Unique identifier for the sprite
+        :param gif_url: URL of the GIF to preload
+        """
+        if sprite_id in self.cache:
+            print(f"GIF for sprite '{sprite_id}' is already preloaded.")
+            return
+
+        try:
+            response = requests.get(gif_url)
+            if response.status_code == 200:
+                gif_data = response.content
+
+                # Create a QBuffer and load the GIF data into it
+                buffer = QtCore.QBuffer()
+                buffer.setData(gif_data)
+                buffer.open(QtCore.QIODevice.ReadOnly)
+
+                # Create QMovie from the buffer
+                movie = QtGui.QMovie()
+                movie.setDevice(buffer)
+                movie.setCacheMode(QtGui.QMovie.CacheAll)  # Cache all frames for smoother playback
+                movie.start()
+
+                # Store references to prevent garbage collection
+                self.cache[sprite_id] = {
+                    'movie': movie,
+                    'buffer': buffer
+                }
+                print(f"Preloaded GIF for sprite '{sprite_id}'.")
+                self.gif_preloaded.emit(sprite_id)
+            else:
+                error_message = f"HTTP {response.status_code}"
+                print(f"Failed to preload GIF for sprite '{sprite_id}': {error_message}")
+                self.gif_load_failed.emit(sprite_id, error_message)
+        except Exception as e:
+            error_message = str(e)
+            print(f"Exception during preloading GIF for sprite '{sprite_id}': {error_message}")
+            self.gif_load_failed.emit(sprite_id, error_message)
+
+    def get_movie(self, sprite_id):
+        """
+        Retrieve the preloaded QMovie for the given sprite.
+
+        :param sprite_id: Unique identifier for the sprite
+        :return: QMovie object or None if not found
+        """
+        return self.cache.get(sprite_id, {}).get('movie', None)
+            
+
+
+class SpriteLabel(QtWidgets.QLabel):
+    def __init__(self, pixmap, gif_url, gif_cache, sprite_id, parent=None):
+        super().__init__(parent)
+        self.setPixmap(pixmap)
+        self.gif_url = gif_url
+        self.gif_cache = gif_cache
+        self.sprite_id = sprite_id
+        self.setScaledContents(True)
+        self.movie = None
+        self.gif_popup = None
+
+        # Install event filters to handle hover events
+        self.setMouseTracking(True)
+        self.installEventFilter(self)
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.Enter:
+            self.on_hover_enter()
+        elif event.type() == QtCore.QEvent.Leave:
+            self.on_hover_leave()
+        return super().eventFilter(source, event)
+
+    def on_hover_enter(self):
+        """Display the GIF popup when hovering over the sprite."""
+        # Retrieve the preloaded movie from the cache
+        movie = self.gif_cache.get_movie(self.sprite_id)
+        if movie:
+            self.gif_popup = GifPopup(movie, self)
+            # Position the popup near the sprite label
+            pos = self.mapToGlobal(QtCore.QPoint(0, self.height()))
+            self.gif_popup.move(pos)
+            self.gif_popup.show()
+        else:
+            print(f"No preloaded GIF available for sprite '{self.sprite_id}'.")
+
+    def on_hover_leave(self):
+        """Close the GIF popup when the cursor leaves the sprite."""
         if self.gif_popup:
-            self.gif_popup.hide()  # Hide the GIF popup
+            self.gif_popup.close()
+            self.gif_popup = None
 
 if __name__ == "__main__":
     import sys
