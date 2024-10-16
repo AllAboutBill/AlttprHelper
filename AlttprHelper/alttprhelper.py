@@ -846,10 +846,10 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
                 # Gather newly converted WAV files after PCM conversion
                 wav_files = [os.path.join(msu_folder, f) for f in os.listdir(msu_folder) if f.endswith('.wav')]
 
-    # Sort the playlist based on the track number in the filename (using regex to extract the number)
-    def extract_track_number(file_name):
-            match = re.search(r'-(\d+)\.wav$', file_name)
-            return int(match.group(1)) if match else float('inf')  # Handle non-numbered files gracefully
+            # Sort the playlist based on the track number in the filename (using regex to extract the number)
+            def extract_track_number(file_name):
+                match = re.search(r'-(\d+)\.wav$', file_name)
+                return int(match.group(1)) if match else float('inf')  # Handle non-numbered files gracefully
 
             self.playlist = sorted(wav_files, key=extract_track_number)
 
