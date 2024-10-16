@@ -72,7 +72,7 @@ Manage your audio playback with intuitive controls to enhance your gaming experi
 Preview MSU:
 
 Check the "MSU Preview" box to enable audio previews of your selected MSU-1 soundpacks.
-(Soundpacks can be found here)
+(Soundpacks can be found [here](https://docs.google.com/spreadsheets/d/1XRkR4Xy6S24UzYkYBAOv-VYWPKZIoUKgX04RbjF128Q/edit?gid=1770895641#gid=1770895641))
 Playback Controls:
 
 Previous: Skip to the previous track in your playlist.
