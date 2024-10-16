@@ -31,6 +31,7 @@ Preset Management & Customization:
 Create, save, load, and manage presets to quickly apply your favorite configurations or experiment with new setups.
 
 🚀 Getting Started
+
 Download the Application:
 Obtain the ALTTPRSeedGeneratorHelper.exe file from the releases tab.
 
@@ -125,6 +126,7 @@ Consistency: Maintain consistent settings across multiple game seeds by applying
 
 
 🆘 Support
+
 I am just a beginner with Python, so I guarantee there are bugs. I have tried to squash as many as I could before uploading this, but I assure you that my code is not great. If you need help or have any suggestions, feel free to contact me on Discord: @AllAboutBill.
 
 Thank you for choosing ALTTPR Helper! May your adventures in Hyrule be ever exciting and uniquely yours.
