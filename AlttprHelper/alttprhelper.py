@@ -206,7 +206,7 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         # Initialize the GIF Cache **before** loading sprites and updating display
         self.gif_cache = GifCache()
         self.gif_cache.gif_preloaded.connect(self.on_gif_preloaded)
-        self.gif_cache.gif_load_failed.connect(self.on_gif_load_failed)
+
 
         # Load the sprite sheet and data
         self.load_sprites()
@@ -2462,13 +2462,6 @@ class ALTTPRSeedGeneratorApp(QtWidgets.QMainWindow):
         """Handle successful GIF preloading."""
         print(f"Successfully preloaded GIF for sprite '{sprite_id}'.")
 
-    def on_gif_load_failed(self, sprite_id, error_message):
-        """Handle failed GIF preloading."""
-        QtWidgets.QMessageBox.warning(
-            self,
-            "GIF Load Failed",
-            f"Failed to preload GIF for sprite '{sprite_id}': {error_message}"
-        )
 
 
     def update_sprite_display_in_actions(self):
@@ -5162,7 +5155,7 @@ class GifPopup(QtWidgets.QWidget):
 
 class GifCache(QtCore.QObject):
     gif_preloaded = QtCore.pyqtSignal(str)
-    gif_load_failed = QtCore.pyqtSignal(str, str)
+
 
     def __init__(self):
         super().__init__()
@@ -5206,11 +5199,11 @@ class GifCache(QtCore.QObject):
             else:
                 error_message = f"HTTP {response.status_code}"
                 print(f"Failed to preload GIF for sprite '{sprite_id}': {error_message}")
-                self.gif_load_failed.emit(sprite_id, error_message)
+
         except Exception as e:
             error_message = str(e)
             print(f"Exception during preloading GIF for sprite '{sprite_id}': {error_message}")
-            self.gif_load_failed.emit(sprite_id, error_message)
+
 
     def get_movie(self, sprite_id):
         """
@@ -5256,7 +5249,7 @@ class SpriteLabel(QtWidgets.QLabel):
             self.gif_popup.move(pos)
             self.gif_popup.show()
         else:
-            print(f"No preloaded GIF available for sprite '{self.sprite_id}'.")
+            return
 
     def on_hover_leave(self):
         """Close the GIF popup when the cursor leaves the sprite."""
