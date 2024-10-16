@@ -14,6 +14,7 @@ Using the Application
 4. Troubleshooting & Support
 
 🌟 Features
+
 Customize Patch Settings:
 Tailor various aspects of your game seed, including heart speed, heart color, sprite selection, menu speed, and more.
 
