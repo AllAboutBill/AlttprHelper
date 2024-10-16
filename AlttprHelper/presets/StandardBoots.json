@@ -1,0 +1,166 @@
+{
+  "glitches": "none",
+  "item_placement": "basic",
+  "dungeon_items": "standard",
+  "accessibility": "items",
+  "goal": "ganon",
+  "crystals": {
+    "ganon": "0",
+    "tower": "0"
+  },
+  "mode": "standard",
+  "hints": "on",
+  "weapons": "randomized",
+  "item": {
+    "pool": "normal",
+    "functionality": "normal"
+  },
+  "tournament": true,
+  "spoilers": "on",
+  "lang": "en",
+  "enemizer": {
+    "boss_shuffle": "none",
+    "enemy_shuffle": "none",
+    "enemy_damage": "default",
+    "enemy_health": "default"
+  },
+  "name": "StandardBoots",
+  "notes": "Standard mode, Boots start with Randomized Swords",
+  "l": {},
+  "eq": [
+    "PegasusBoots"
+  ],
+  "drops": {
+    "0": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "1": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "2": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "3": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "4": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "5": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "6": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "pull": [
+      "auto_fill",
+      "auto_fill",
+      "auto_fill"
+    ],
+    "crab": [
+      "auto_fill",
+      "auto_fill"
+    ],
+    "stun": [
+      "auto_fill"
+    ],
+    "fish": [
+      "auto_fill"
+    ]
+  },
+  "custom": {
+    "item.Goal.Required": "",
+    "item.require.Lamp": false,
+    "item.value.BlueClock": "",
+    "item.value.GreenClock": "",
+    "item.value.RedClock": "",
+    "item.value.Rupoor": "",
+    "prize.crossWorld": true,
+    "prize.shuffleCrystals": true,
+    "prize.shufflePendants": true,
+    "region.bossNormalLocation": true,
+    "region.wildBigKeys": false,
+    "region.wildCompasses": false,
+    "region.wildKeys": false,
+    "region.wildMaps": false,
+    "rom.dungeonCount": "off",
+    "rom.freeItemMenu": false,
+    "rom.freeItemText": false,
+    "rom.mapOnPickup": false,
+    "rom.timerMode": "off",
+    "rom.timerStart": "",
+    "rom.rupeeBow": false,
+    "rom.genericKeys": false,
+    "rom.logicMode": "NoGlitches",
+    "spoil.BootsLocation": false,
+    "canBootsClip": false,
+    "canBunnyRevive": false,
+    "canBunnySurf": false,
+    "canDungeonRevive": false,
+    "canFakeFlipper": false,
+    "canMirrorClip": false,
+    "canMirrorWrap": false,
+    "canTransitionWrapped": false,
+    "canOneFrameClipOW": false,
+    "canOneFrameClipUW": false,
+    "canOWYBA": false,
+    "canSuperBunny": false,
+    "canSuperSpeed": false,
+    "canWaterWalk": false,
+    "item": {
+      "count": {}
+    },
+    "drop": {
+      "count": {}
+    }
+  }
+}

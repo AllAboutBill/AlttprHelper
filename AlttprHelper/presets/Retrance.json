@@ -1,0 +1,28 @@
+{
+  "glitches": "none",
+  "item_placement": "advanced",
+  "dungeon_items": "standard",
+  "accessibility": "items",
+  "crystals": {
+    "ganon": "7",
+    "tower": "7"
+  },
+  "goal": "ganon",
+  "mode": "retro",
+  "entrances": "crossed",
+  "hints": "on",
+  "weapons": "randomized",
+  "item": {
+    "pool": "normal",
+    "functionality": "normal"
+  },
+  "tournament": false,
+  "spoilers": "on",
+  "lang": "en",
+  "enemizer": {
+    "boss_shuffle": "none",
+    "enemy_shuffle": "none",
+    "enemy_damage": "default",
+    "enemy_health": "default"
+  }
+}
