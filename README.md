@@ -48,6 +48,7 @@ Note: MSU files should be separated into folders containing PCM files. The app w
 🛠 Using the Application
 
 1. Customize Patch
+
 The Customize Patch dialog allows you to tailor various game settings to create a unique seed.
 
 Accessing Customize Patch:
@@ -69,6 +70,7 @@ After customizing your settings, click "OK" to apply them.
 To save your current settings as default, click "Save as Default."
 
 2. Audio Controls
+
 Manage your audio playback with intuitive controls to enhance your gaming experience.
 
 Preview MSU:
@@ -87,6 +89,7 @@ Volume Adjustment:
 Use the volume slider to adjust the playback volume to your preference.
 
 3. Preset Management & Customization
+
 Streamline your seed setup by customizing presets, allowing you to quickly apply your favorite configurations or experiment with new setups.
 
 Creating a New Preset:
