@@ -5,9 +5,13 @@ Release Date: October 15, 2024
 Welcome to the ALTTPR Helper, a user-friendly tool designed to enhance your experience with The Legend of Zelda: A Link to the Past Randomizer (ALTTPR). Whether you're customizing your game seeds, selecting unique sprites, managing presets, or enjoying immersive audio previews, this application streamlines the process to make your randomization journey seamless and enjoyable.
 
 📋 Table of Contents
+
 Features
+
 Getting Started
+
 Using the Application
+
 1. Customize Patch
 2. Audio Controls
 3. Preset Management & Customization
