@@ -42,7 +42,9 @@ Initial Setup:
 Upon first launch, the application will load your existing configuration or default settings.
 Ensure that your MSU-1 soundpacks are properly installed and accessible.
 Note: MSU files should be separated into folders containing PCM files. The app will add a dummy .msu file if one is not preset. It will copy all PCM files, rename them to coincide with the seed name, and place all files together in a new folder within your provided output path.
+
 🛠 Using the Application
+
 1. Customize Patch
 The Customize Patch dialog allows you to tailor various game settings to create a unique seed.
 
@@ -63,6 +65,7 @@ Saving Settings:
 
 After customizing your settings, click "OK" to apply them.
 To save your current settings as default, click "Save as Default."
+
 2. Audio Controls
 Manage your audio playback with intuitive controls to enhance your gaming experience.
 
@@ -80,6 +83,7 @@ Stop: Completely stop audio playback.
 Volume Adjustment:
 
 Use the volume slider to adjust the playback volume to your preference.
+
 3. Preset Management & Customization
 Streamline your seed setup by customizing presets, allowing you to quickly apply your favorite configurations or experiment with new setups.
 
