@@ -37,7 +37,7 @@ Create, save, load, and manage presets to quickly apply your favorite configurat
 🚀 Getting Started
 
 Download the Application:
-Obtain the ALTTPRSeedGeneratorHelper.exe file from the releases tab.
+Obtain the ALTTPRHelper.exe file from the releases tab.
 
 Run the Application:
 
