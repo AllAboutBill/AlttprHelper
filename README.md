@@ -36,7 +36,7 @@ Welcome to the **ALTTPR Helper**, a user-friendly tool designed to enhance your 
 
 ### 1. Download the Application
 
-Obtain the `ALTTPRSeedGeneratorHelper.exe` file from the [releases](https://github.com/allaboutbill/alttprhelper/releases) tab.
+Obtain the `ALTTPRHelper.exe` file from the [releases](https://github.com/allaboutbill/alttprhelper/releases) tab.
 
 ### 2. Run the Application
 
