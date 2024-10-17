@@ -41,7 +41,7 @@ Obtain the `ALTTPRHelper.exe` file from the [releases](https://github.com/allabo
 ### 2. Run the Application
 
 - **Launch the Application:**  
-  Double-click the `ALTTPRSeedGeneratorHelper.exe` file to launch the application. If prompted by your system's security settings, confirm that you want to run the application.
+  Double-click the `ALTTPRHelper.exe` file to launch the application. If prompted by your system's security settings, confirm that you want to run the application.
 
 ### 3. Initial Setup
 
