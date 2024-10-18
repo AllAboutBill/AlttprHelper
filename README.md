@@ -52,6 +52,7 @@ Obtain the `ALTTPRHelper.exe` file from the [releases](https://github.com/allabo
   Ensure that your MSU-1 soundpacks are properly installed and accessible.  
   **Note:**  
   - MSU files should be separated into folders containing PCM files.  
+  - The folders containing PCM files should be nested within your base msu directory and named the same as the MSU pack. 
   - The app will add a dummy `.msu` file if one is not preset.  
   - It will copy all PCM files, rename them to coincide with the seed name, and place all files together in a new folder within your provided output path.
 
